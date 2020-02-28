@@ -25,7 +25,7 @@ class OrganizationManager(object):
 
     def add_customer(self, organization, customer):
         print("Cusotmer:", customer)
-        LOG.info(f"Adding {customer['emailAddress']} to "
+        LOG.info(f"Adding {customer} to "
                  f"{organization['name']}")
 
         # TODO(Simon): to do confirm if this is correct for server
