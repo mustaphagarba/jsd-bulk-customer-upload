@@ -53,12 +53,20 @@ class Client(object):
         headers.update({"Content-Type": "application/json"})
         kwargs["headers"] = headers
         response = self.request("POST", url, **kwargs)
+
+        if not response.ok:
+            LOG.debug(response.text)
+
         response.raise_for_status()
         return response
 
     def get(self, url, **kwargs):
         response = self.request("GET", url, **kwargs)
         response.raise_for_status()
+
+        if not response.ok:
+            LOG.debug(response.text)
+
         return response
 
     def get_paginated_resource(self, url, content_key, **kwargs):
@@ -76,9 +84,16 @@ class Client(object):
 
     @property
     def platform(self):
-        if urlparse(self.base_url).netloc.endswith("atlassian.net/"):
+        if urlparse(self.base_url).netloc.endswith("atlassian.net"):
             return "cloud"
         return "server"
+
+    def __str__(self):
+        details = {
+            "platform": self.platform,
+            "verify": self.verify,
+            "base_url": self.base_url}
+        return f"Client {details}"
 
 
 client = None

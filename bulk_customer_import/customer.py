@@ -18,5 +18,4 @@ class CustomerManager(object):
         customer = {"email": email, name_field_key: name}
         response = self.client.post(
             "customer", data=customer, experimental=True)
-        print(response)
         return response.json()

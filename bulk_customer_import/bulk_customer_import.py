@@ -52,6 +52,7 @@ def main():
         base_url=args.base_url,
         auth_user=args.auth_user,
         auth_pass=args.auth_pass)
+    LOG.debug(client)
 
     servicedesk_id = args.servicedesk_id
     # Parse CSV
@@ -99,9 +100,8 @@ def main():
             try:
                 client.servicedesk.add_organization(
                     args.servicedesk_id, organization)
-            except HTTPError as e:
+            except HTTPError:  # noqa
                 LOG.info("Organization already part of service desk")
-                pass
 
             # Move the customer into the organization
             client.organization.add_customer(organization, customer)
