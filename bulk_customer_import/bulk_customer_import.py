@@ -1,6 +1,8 @@
 import logging
 import argparse
 
+from requests.exceptions import HTTPError
+
 from bulk_customer_import import client as sdclient
 from bulk_customer_import import utils
 
@@ -76,13 +78,15 @@ def main():
                 customer_name_key = "displayName"
 
             # Create the customer if they do not already exist
-            new_customer = {
-                customer_name_key: customer_name,
-                "emailAddress": customer_email,
-            }
-            existing_customer = client.customer.create(
-                customer_name, customer_email)
-            customer = existing_customer if existing_customer else new_customer
+            try:
+                customer = client.customer.create(
+                    customer_name, customer_email)
+            except HTTPError as e:  # noqa
+                LOG.info("Customer Already Exists")
+                customer = {
+                    customer_name_key: customer_name,
+                    "emailAddress": customer_email,
+                }
 
             # Create organisation if one does not exist
             if organization_name in organizations:
@@ -91,17 +95,22 @@ def main():
             else:
                 organization = client.organization.create(
                     organization_name)
-                print("Created organization", organization)
+
+            try:
                 client.servicedesk.add_organization(
-                    args.servicedesk_id, organization
-                )
+                    args.servicedesk_id, organization)
+            except HTTPError as e:
+                LOG.info("Organization already part of service desk")
+                pass
+
             # Move the customer into the organization
             client.organization.add_customer(organization, customer)
+
             # Add the customer into the service desk
             client.servicedesk.add_customer(servicedesk_id, customer)
-        except Exception as e:
-            print("Failed to process row: {}".format(row))
-            logging.exception(e)
+
+        except Exception as e:  # noqa
+            LOG.exception("Failed to process row: {}".format(row))
             rows_not_processed.append(row)
 
     if rows_not_processed:

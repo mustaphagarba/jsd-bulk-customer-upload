@@ -16,5 +16,7 @@ class CustomerManager(object):
             name_field_key = "displayName"
 
         customer = {"email": email, name_field_key: name}
-        return self.client.post(
-            "customer", data=customer, experimental=True).json()
+        response = self.client.post(
+            "customer", data=customer, experimental=True)
+        print(response)
+        return response.json()

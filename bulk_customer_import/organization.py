@@ -8,26 +8,19 @@ class OrganizationManager(object):
         self.client = client
 
     def list(self):
-
         LOG.info("Retrieving organisations")
-
         return self.client.get_paginated_resource(
-            "organization/", "values", experimental=True
+            "organization", "values", experimental=True
         )
 
     def create(self, name):
-
-        LOG.info(f"Creating organisation: {name}")
-
+        LOG.info(f"Creating organisation")
         return self.client.post(
-            "organization/", data={"name": name}, experimental=True
+            "organization", data={"name": name}, experimental=True
         ).json()
 
     def add_customer(self, organization, customer):
-        print("Cusotmer:", customer)
-        LOG.info(f"Adding {customer} to "
-                 f"{organization['name']}")
-
+        LOG.info(f"Adding customer to organization")
         # TODO(Simon): to do confirm if this is correct for server
         fields = ("usernames", "emailAddress")
         if self.client.platform == "cloud":

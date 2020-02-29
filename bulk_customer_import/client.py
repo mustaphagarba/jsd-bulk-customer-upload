@@ -41,7 +41,7 @@ class Client(object):
             kwargs["data"] = json.dumps(kwargs["data"])
 
         url = urljoin(self.api_url, url)
-        LOG.debug(f"{method} {url} {headers} {kwargs}")
+        # LOG.debug(f"{method} {url} {headers} {kwargs}")
         auth = HTTPBasicAuth(self.auth_user, self.auth_pass)
 
         return requests.request(
@@ -52,10 +52,14 @@ class Client(object):
         headers = kwargs.pop("headers", {})
         headers.update({"Content-Type": "application/json"})
         kwargs["headers"] = headers
-        return self.request("POST", url, **kwargs)
+        response = self.request("POST", url, **kwargs)
+        response.raise_for_status()
+        return response
 
     def get(self, url, **kwargs):
-        return self.request("GET", url, **kwargs)
+        response = self.request("GET", url, **kwargs)
+        response.raise_for_status()
+        return response
 
     def get_paginated_resource(self, url, content_key, **kwargs):
 
@@ -72,7 +76,7 @@ class Client(object):
 
     @property
     def platform(self):
-        if urlparse(self.base_url).netloc.endswith("atlassian.net"):
+        if urlparse(self.base_url).netloc.endswith("atlassian.net/"):
             return "cloud"
         return "server"
 
